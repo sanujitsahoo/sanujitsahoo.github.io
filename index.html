@@ -3,31 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sanujit Sahoo | Personal Website</title>
-    <link rel="stylesheet" href="style.css">
+    <title>NextPlay Gold | Clinical Baby Development Engine</title>
+    <style>
+        :root {
+            --primary: #D97706; /* NextPlay Amber/Gold */
+            --bg: #FFFBEB;      /* Soft Amber background */
+            --card-bg: #ffffff;
+            --text-dark: #1F2937;
+            --text-muted: #6B7280;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-bottom: 1px solid #FEF3C7;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 1rem auto 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(217, 119, 6, 0.05);
+            border: 1px solid #FEF3C7;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .link-group {
+            margin-top: 1.5rem;
+        }
+
+        .link-item {
+            display: block;
+            padding: 0.75rem 0;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-bottom: 1px solid #F3F4F6;
+            font-weight: 500;
+        }
+
+        .link-item:hover {
+            color: var(--primary);
+        }
+
+        .cta-container {
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 99px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            filter: brightness(1.1);
+        }
+
+        footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to My Personal Website</h1>
+
+    <header class="hero">
+        <h1>NextPlay Gold</h1>
+        <p>A data-driven recommendation engine for infant development, powered by clinical GSED milestones and transition matrices.</p>
     </header>
 
-    <main>
-        <section>
-            <h2>About Me</h2>
-            <p>Hello! My name is Sanujit. I am building NextPlay, a baby development tracker.</p>
-        </section>
-
-        <section>
-            <h2>Projects</h2>
-            <ul>
-                <li><a href="https://nextplay-gold.vercel.app">NextPlay App</a></li>
-                <li><a href="https://github.com/sanujitsahoo/nextplay">GitHub Repository</a></li>
-            </ul>
-        </section>
-    </main>
-
-    <footer>
-        <p>© 2026 Sanujit Sahoo</p>
-    </footer>
-</body>
-</html>
+    <main class="container">
+        <div class="grid">
+            <section class="card">
+                <h2>Technical Resources</h2>
+                <p>Deep dives into the recommendation logic, data processing, and clinical scoring models.</p>
+                <div class="link-group">
+                    <a href="https://github.com/sanujitsahoo/nextplay/blob/main/TECHNICAL_DOCUMENTATION.html" class="link-item" target="_blank">
+                        📄 Technical Documentation →
+                    </a>
+                    <a href="
