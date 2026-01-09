@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextPlay Recommender System - Detailed Algorithm Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .nav {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        
+        .nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        
+        section {
+            background: white;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        
+        section h2 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        section h3 {
+            color: #764ba2;
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        section h4 {
+            color: #5a67d8;
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .intuition {
+            background: linear-gradient(135deg, #f6f8ff 0%, #e8edff 100%);
+            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+        
+        .intuition h4 {
+            color: #667eea;
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .intuition::before {
+            content: "💡";
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+        
+        .technical {
+            background: #f8f9fa;
+            border-left: 4px solid #764ba2;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+        }
+        
+        .technical h4 {
+            color: #764ba2;
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        code {
+            background: #e9ecef;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+            color: #d63384;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .algorithm-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .algorithm-box h4 {
+            color: #856404;
+            margin-bottom: 0.75rem;
+        }
+        
+        ul, ol {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>NextPlay Recommender System</h1>
+            <p>Detailed Algorithm Documentation: From Data to Personalized Recommendations</p>
+        </header>
+        
+        <nav class="nav">
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#mastery-age">Mastery Age</a></li>
+                <li><a href="#transition-matrix">Transition Matrix</a></li>
+                <li><a href="#recommendation-engine">Recommendation Engine</a></li>
+                <li><a href="#scoring">Scoring Mechanisms</a></li>
+                <li><a href="#filtering">Filtering & Quality</a></li>
+                <li><a href="#new-user">New User Recommendations</a></li>
+                <li><a href="#fallback">Fallback Mechanisms</a></li>
+                <li><a href="#proficiency">Proficiency Detection</a></li>
+            </ul>
+        </nav>
+        
+        <!-- Overview Section -->
+        <section id="overview">
+            <h2>1. Recommender System Overview</h2>
+            
+            <div class="intuition">
+                <h4>Intuition</h4>
+                <p>
+                    The NextPlay recommender system transforms clinical milestone data into personalized activity recommendations. At its core, it learns 
+                    from thousands of children's developmental trajectories to predict what milestones a baby is likely to achieve next, based on what 
+                    they've already accomplished and their current age. The system ensures a balanced mix of recommendations: catching up on foundational 
+                    skills, progressing with age-appropriate activities, and challenging with advanced milestones.
+                </p>
+            </div>
+            
+            <div class="technical">
+                <h4>Core Components</h4>
+                <p>
+                    The recommender system consists of three foundational algorithms:
+                </p>
+                <ol>
+                    <li><strong>Mastery Age Calculation</strong>: Determines the typical age when children achieve each milestone</li>
+                    <li><strong>Transition Matrix Construction</strong>: Identifies sequential learning patterns (which milestones follow which)</li>
+                    <li><strong>Recommendation Engine</strong>: Generates personalized recommendations using frontier identification, scoring, and filtering</li>
+                </ol>
+                
+                <p><strong>Input:</strong> User's completed milestone IDs, baby's age in months</p>
+                <p><strong>Output:</strong> Up to 3 recommendations, each categorized as Foundational, Likely, or Challenge</p>
+                
+                <p><strong>Key Design Principles:</strong></p>
+                <ul>
+                    <li><strong>Pre-computation</strong>: Mastery ages and transition matrix are calculated once during training, not per request</li>
+                    <li><strong>Probabilistic Approach</strong>: Uses transition probabilities to find likely next steps</li>
+                    <li><strong>Balanced Recommendations</strong>: Ensures mix of foundational, likely, and challenge milestones</li>
+                    <li><strong>Domain Diversity</strong>: Prioritizes milestones across different developmental domains (Cognitive, Fine Motor, Gross Motor)</li>
+                    <li><strong>Proficiency Awareness</strong>: Detects when babies are advanced and avoids recommending milestones that are too young</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- Mastery Age Section -->
+        <section id="mastery-age">
+            <h2>2. Mastery Age Calculation</h2>
+            
+            <div class="intuition">
+                <h4>Intuition</h4>
+                <p>
+                    When do babies typically learn to sit up? When do they start crawling? The mastery age represents the median age at which children 
+                    achieve a milestone. We use the median (middle value) rather than the mean because it's more robust to outliers—some children develop 
+                    very early or very late, but the median gives us a better sense of the "typical" development pattern. This baseline expectation allows 
+                    us to identify milestones that a baby should have achieved by now (foundational) versus milestones that are age-appropriate or advanced.
+                </p>
+            </div>
+            
+            <div class="technical">
+                <h4>Algorithm</h4>
+                <p>
+                    For each milestone, we identify when each child transitions from <code>0</code> (not achieved) to <code>1</code> (achieved):
+                </p>
+                
+                <div class="algorithm-box">
+                    <h4>Mastery Age Calculation Algorithm</h4>
+                    <ol>
+                        <li>For each child in the dataset:
+                            <ul>
+                                <li>Sort observations by age (chronologically)</li>
+                                <li>Filter out untested milestones (<code>-1</code>)</li>
+                                <li>Find the first occurrence where milestone transitions from <code>0</code> → <code>1</code></li>
+                                <li>Record the age (in months) at which this transition occurred</li>
+                            </ul>
+                        </li>
+                        <li>Collect all transition ages across all children</li>
+                        <li>Calculate the <strong>median</strong> of these transition ages</li>
+                        <li>This median becomes the <code>mastery_age</code> for the milestone</li>
+                    </ol>
+                </div>
+                
+                <pre><code>def calculate_mastery_age(df, milestone_col):
+    transitions = []
+    
+    for subjid in df['subjid'].unique():
+        child_data = df[df['subjid'] == subjid].sort_values('age_months')
+        
+        # Track values chronologically, ignoring -1
+        values_with_age = [
+            (row['age_months'], row[milestone_col])
+            for _, row in child_data.iterrows()
+            if row[milestone_col] != -1
+        ]
+        
+        # Look for transition from 0 to 1
+        for i in range(1, len(values_with_age)):
+            prev_age, prev_value = values_with_age[i-1]
+            current_age, current_value = values_with_age[i]
+            
+            if prev_value == 0 and current_value == 1:
+                transitions.append(current_age)
+                break  # Only count first transition
+    
+    if len(transitions) == 0:
+        return None
+    
+    mastery_age = np.median(transitions)
+    return mastery_age</code></pre>
+                
+                <p><strong>Why median instead of mean?</strong></p>
+                <ul>
+                    <li>More robust to outliers (some children may develop very early or very late)</li>
+                    <li>Represents the "typical" development pattern better</li>
+                    <li>Less sensitive to extreme values that might skew recommendations</li>
+                </ul>
+                
+                <p><strong>Output Format:</strong></p>
+                <pre><code>{
+  "ddigmd055": 3.08,   # "No head lag if pulled to sitting" mastered at ~3 months
+  "ddigmd061": 5.45,   # "Sits without support" mastered at ~5.5 months
+  "ddicmm030": 2.12,   # "Smiles in response" mastered at ~2 months
+  ...
+}</code></pre>
+            </div>
+        </section>
+        
+        <!-- Transition Matrix Section -->
+        <section id="transition-matrix">
+            <h2>3. Transition Matrix: Sequential Learning Patterns</h2>
+            
+            <div class="intuition">
+                <h4>Intuition</h4>
+                <p>
+                    Babies don't learn milestones in isolation—they follow natural developmental sequences. For example, after learning to roll over, 
+                    babies often next learn to sit up, then crawl. The transition matrix captures these patterns by asking: "For children who have 
+                    mastered milestone X, what milestone do they most commonly master next?" This creates a probabilistic map of developmental 
+                    progression, similar to how Google's PageRank understands which pages link to which. The result is a network of milestone 
+                    relationships that allows us to predict likely next steps.
+                </p>
+            </div>
+            
+            <div class="technical">
+                <h4>Transition Matrix Construction</h4>
+                <p>
+                    The transition matrix is a dictionary where each key is a milestone ID, and the value is a list of tuples: 
+                    <code>(next_milestone, probability)</code>, sorted by probability (highest first).
+                </p>
+                
+                <div class="algorithm-box">
+                    <h4>Transition Matrix Algorithm</h4>
+                    <ol>
+                        <li>For each child, identify all milestone transitions (0→1) and record the age at which each occurred</li>
+                        <li>Sort milestones by transition age (chronological order of mastery)</li>
+                        <li>For each milestone X that a child mastered:
+                            <ul>
+                                <li>Find the next milestone Y that the child mastered (earliest age > X's mastery age)</li>
+                                <li>Increment count: <code>transitions[X][Y] += 1</code></li>
+                            </ul>
+                        </li>
+                        <li>After processing all children, convert counts to probabilities:
+                            <ul>
+                                <li>For each milestone X: <code>probability(Y) = count(X→Y) / total_transitions_from_X</code></li>
+                                <li>Sort by probability (highest first)</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+                
+                <pre><code>def create_transition_matrix(df, milestone_cols):
+    transitions = defaultdict(lambda: defaultdict(int))
+    
+    for subjid in df['subjid'].unique():
+        child_data = df[df['subjid'] == subjid].sort_values('age_months')
+        milestone_first_mastered = {}
+        
+        # Identify when each milestone transitions to 1
+        for milestone in milestone_cols:
+            milestone_data = [
+                (row['age_months'], row[milestone])
+                for _, row in child_data.iterrows()
+                if row[milestone] != -1
+            ]
+            
+            # Find first 0→1 transition
+            for i in range(1, len(milestone_data)):
+                prev_age, prev_value = milestone_data[i-1]
+                current_age, current_value = milestone_data[i]
+                if prev_value == 0 and current_value == 1:
+                    milestone_first_mastered[milestone] = current_age
+                    break
+        
+        # Find next milestone after each milestone
+        mastered_list = sorted(milestone_first_mastered.items(), key=lambda x: x[1])
+        for i, (milestone_x, age_x) in enumerate(mastered_list):
+            next_milestone = None
+            next_age = float('inf')
+            for milestone_y, age_y in mastered_list:
+                if milestone_y != milestone_x and age_y > age_x and age_y < next_age:
+                    next_milestone = milestone_y
+                    next_age = age_y
+            
+            if next_milestone:
+                transitions[milestone_x][next_milestone] += 1
+    
+    # Convert to probabilities
+    transition_probs = {}
+    for milestone_x in milestone_cols:
+        if milestone_x not in transitions:
+            transition_probs[milestone_x] = []
+            continue
+        
+        next_milestones = transitions[milestone_x]
+        total_transitions = sum(next_milestones.values())
+        
+        prob_list = [
+            (milestone_y, count / total_transitions)
+            for milestone_y, count in next_milestones.items()
+        ]
+        prob_list.sort(key=lambda x: x[1], reverse=True)
+        transition_probs[milestone_x] = prob_list
+    
+    return transition_probs</code></pre>
+                
+                <p><strong>Example Output:</strong></p>
+                <pre><code>{
+  "ddigmd055": [
+    ["ddigmd061", 0.45],  // 45% of children master ddigmd061 next
+    ["ddigmd062", 0.32],  // 32% master ddigmd062 next
+    ["ddifmd005", 0.23]   // 23% master ddifmd005 next
+  ],
+  ...
+}</code></pre>
+                
+                <p><strong>Key Insights:</strong></p>
+                <ul>
+                    <li>Transition probabilities sum to 1.0 for each source milestone</li>
+                    <li>Higher probabilities indicate more common developmental sequences</li>
+                    <li>Some milestones may have no transitions (terminal milestones in the observed dataset)</li>
+                    <li>The matrix is asymmetric: X→Y does not imply Y→X with the same probability</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- Recommendation Engine Section -->
+        <section id="recommendation-engine">
+            <h2>4. Recommendation Engine: Core Algorithm</h2>
+            
+            <div class="intuition">
+                <h4>Intuition</h4>
+                <p>
+                    The recommendation engine is the "brain" that generates personalized suggestions. It takes a user's completed milestones and their 
+                    baby's age, then uses the transition matrix to find the "frontier" of next likely milestones. Think of it like finding the edge of 
+                    explored territory on a map—we know where the baby has been (completed milestones), and we want to identify what's just beyond that 
+                    frontier. The engine then categorizes these frontier milestones into three types: <strong>Foundational</strong> (milestones the baby 
+                    should have achieved by now), <strong>Likely</strong> (natural next steps with high probability), and <strong>Challenge</strong> 
+                    (advanced milestones for future development). This ensures parents get a balanced mix of catch-up activities, age-appropriate 
+                    activities, and future challenges—like a personalized curriculum.
+                </p>
+            </div>
+            
+            <div class="technical">
+                <h4>Six-Step Recommendation Process</h4>
+                
+                <h5>Step 1: Frontier Identification</h5>
+                <p>
+                    For existing users (with completed milestones), we aggregate transition probabilities from all completed milestones:
+                </p>
+                <pre><code>frontier_scores = defaultdict(float)
+
+for completed_id in user_completed_ids:
+    if completed_id in transition_matrix:
+        for next_milestone, probability in transition_matrix[completed_id]:
+            if next_milestone not in user_completed_ids:
+                # Aggregate: take maximum probability from all completed milestones
+                frontier_scores[next_milestone] = max(
+                    frontier_scores[next_milestone], 
+                    probability
+                )</code></pre>
+                
+                <p>
+                    This creates a "frontier" of milestones that are likely next steps, weighted by how common they are as transitions from 
+                    the user's completed milestones. The maximum aggregation ensures that if multiple completed milestones point to the same 
+                    next milestone, we use the highest probability (most confident transition).
+                </p>
+                
+                <p><strong>Example:</strong></p>
+                <p>
+                    If a user has completed <code>["ddigmd055", "ddigmd061"]</code>:
+                </p>
+                <ul>
+                    <li><code>ddigmd055</code> → <code>ddigmd062</code> with probability 0.45</li>
+                    <li><code>ddigmd061</code> → <code>ddigmd062</code> with probability 0.38</li>
+                    <li><code>ddigmd061</code> → <code>ddifmd005</code> with probability 0.32</li>
+                </ul>
+                <p>
+                    The frontier would be: <code>{"ddigmd062": 0.45, "ddifmd005": 0.32}</code> (using max probability for ddigmd062)
+                </p>
+                
+                <h5>Step 2: Scoring & Categorization</h5>
+                <p>Each frontier milestone is scored and categorized:</p>
+                
+                <table>
+                    <tr>
+                        <th>Score Type</th>
+                        <th>Formula</th>
+                        <th>Purpose</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Transition Probability</strong></td>
+                        <td><code>P(milestone | completed)</code></td>
+                        <td>How likely this milestone is given completed milestones</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Discovery Score</strong></td>
+                        <td><code>1 - transition_probability</code></td>
+                        <td>Higher for rare/advanced milestones (for diversity)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Foundation Score</strong></td>
+                        <td><code>min(max(0, baby_age - mastery_age), 12) / 12</code></td>
+                        <td>Higher if baby is past typical mastery age (0-1 scale)</td>
+                    </tr>
+                </table>
+                
+                <h5>Step 3: Category Assignment</h5>
+                <p>Milestones are categorized based on <code>age_difference = baby_age_months - mastery_age</code>:</p>
+                <ul>
+                    <li><strong>Foundational</strong>: <code>0 < age_difference ≤ 3.0</code> (past age, but not too far)</li>
+                    <li><strong>Likely</strong>: <code>-0.5 ≤ age_difference ≤ 0.5</code> (age-appropriate)</li>
+                    <li><strong>Challenge</strong>: <code>-3.0 ≤ age_difference < -0.5</code> (future, within 3 months)</li>
+                </ul>
+                
+                <p>
+                    Milestones outside these bounds are excluded from recommendations (too far in the past or too advanced).
+                </p>
+                
+                <h5>Step 4: Dynamic Weighting (Level Up Effect)</h5>
+                <p>
+                    For users with 5+ completed milestones, we increase the weight of discovery_score to surface more advanced milestones:
+                </p>
+                <pre><code>num_completed = len(user_completed_ids)
+discovery_weight = 0.4 if num_completed >= 5 else 0.2
+
+# Weighted score for Likely/Challenge categories
+weighted_score = transition_probability + (discovery_score * discovery_weight)</code></pre>
+                
+                <p>
+                    This "level up" effect ensures that experienced users (who have completed many milestones) get more diverse and challenging 
+                    recommendations, preventing the system from becoming repetitive.
+                </p>
+                
+                <h5>Step 5: Selection Strategy</h5>
+                <p>
+                    We select one milestone from each category (if available) to ensure a balanced mix:
+                </p>
+                <ol>
+                    <li><strong>Foundational</strong>: Sort by <code>mastery_age</code> (descending) → pick most recent</li>
+                    <li><strong>Likely</strong>: Sort by <code>weighted_score</code> (descending) → pick highest</li>
+                    <li><strong>Challenge</strong>: Sort by <code>weighted_score</code> (descending), then <code>mastery_age</code> (ascending) → pick closest future</li>
+                </ol>
+                
+                <h5>Step 6: Domain Diversity Filter</h5>
+                <p>
+                    To ensure recommendations span different developmental domains, we prioritize milestones from unrepresented domains:
+                </p>
+                <pre><code>def get_milestone_domain(milestone_id: str) -> str:
+    if len(milestone_id) > 3:
+        domain_char = milestone_id[3].lower()
+        if domain_char == 'c': return 'cognitive'
+        elif domain_char == 'f': return 'fine_motor'
+        elif domain_char == 'g': return 'gross_motor'
+    return 'unknown'
+
+# During selection, track selected domains
+# If domain already represented, skip unless no alternatives</code></pre>
+                
+                <p>
+                    This ensures that if two recommendations are already from the "Gross Motor" domain, the third recommendation will prioritize 
+                    "Fine Motor" or "Cognitive" domains if available.
+                </p>
+            </div>
+        </section>
+        
+        <!-- Scoring Mechanisms Section -->
+        <section id="scoring">
+            <h2>5. Scoring Mechanisms</h2>
+            
+            <div class="intuition">
+                <h4>Intuition</h4>
+                <p>
+                    Not all milestones are created equal. Some are more likely given what a baby has already achieved (high transition probability). 
+                    Some are rare but important for advanced development (high discovery score). Some are foundational—the baby should have achieved 
+                    them by now (high foundation score). The scoring system balances these three dimensions to ensure recommendations are both 
+                    relevant and diverse.
+                </p>
+            </div>
+            
+            <div class="technical">
+                <h4>Score Components</h4>
+                
+                <h5>1. Transition Probability</h5>
+                <p>
+                    <strong>Definition:</strong> The probability that a milestone Y follows from completed milestones X, based on the transition matrix.
+                </p>
+                <p><strong>Range:</strong> 0.0 to 1.0 (higher = more likely)</p>
+                <p><strong>Calculation:</strong></p>
+                <pre><code>transition_prob = max(
+    P(Y | X1),  # Probability from first completed milestone
+    P(Y | X2),  # Probability from second completed milestone
+    ...
+)</code></pre>
+                
+                <h5>2. Discovery Score</h5>
+                <p>
+                    <strong>Definition:</strong> <code>discovery_score = 1.0 - transition_probability</code>
+                </p>
+                <p><strong>Range:</strong> 0.0 to 1.0 (higher = rarer/more advanced)</p>
+                <p><strong>Purpose:</strong> Surface milestones that are less common but potentially important for advanced development. Prevents the system from always recommending the most obvious next steps.</p>
+                
+                <h5>3. Foundation Score (formerly Urgency Score)</h5>
+                <p>
+                    <strong>Definition:</strong> Measures how far past the typical mastery age a milestone is.
+                </p>
+                <p><strong>Formula:</strong></p>
+                <pre><code>age_difference = baby_age_months - mastery_age
+foundation_score = min(max(0, age_difference), 12) / 12</code></pre>
+                
+                <p><strong>Range:</strong> 0.0 to 1.0 (higher = more foundational/urgent)</p>
+                <p><strong>Purpose:</strong> Prioritize milestones that the baby should have achieved by now, ensuring catch-up activities are surfaced.</p>
+                
+                <p><strong>Example:</strong></p>
+                <ul>
+                    <li>Baby age: 6 months</li>
+                    <li>Milestone mastery age: 3 months</li>
+                    <li><code>age_difference = 6 - 3 = 3</code></li>
+                    <li><code>foundation_score = min(max(0, 3), 12) / 12 = 3 / 12 = 0.25</code></li>
+                </ul>
+                
+                <h5>4. Weighted Score (for Likely/Challenge categories)</h5>
+                <p>
+                    <strong>Definition:</strong> Combines transition probability with discovery score, with dynamic weighting based on user experience.
+                </p>
+                <p><strong>Formula:</strong></p>
+                <pre><code>discovery_weight = 0.4 if num_completed >= 5 else 0.2
+weighted_score = transition_probability + (discovery_score * discovery_weight)</code></pre>
+                
+                <p><strong>Purpose:</strong> For experienced users (5+ completed milestones), increase the weight of discovery_score to surface more diverse and advanced milestones.</p>
+            </div>
+        </section>
+        
+        <!-- Filtering Section -->
+        <section id="filtering">
+            <h2>6. Filtering & Quality Assurance</h2>
+            
+            <div class="intuition">
+                <h4>Intuition</h4>
+                <p>
+                    Not all milestones have associated play activities. We don't want to recommend milestones that parents can't act on. Additionally, 
+                    we want to ensure strict exclusion of completed milestones (never show the same milestone twice) and maintain diversity across 
+                    developmental domains (Gross Motor, Fine Motor, Cognitive) so parents get a well-rounded set of activities.
+                </p>
+            </div>
+            
+            <div class="technical">
+                <h4>Filtering Layers</h4>
+                
+                <h5>1. Activity-Based Filtering</h5>
+                <p>
+                    Before any recommendation is returned, we filter to only include milestones that have corresponding entries in 
+                    <code>activities.json</code>:
+                </p>
+                <pre><code>available_milestone_ids = set(activities_map.keys())
+
+# Filter frontier scores
+frontier_scores = {
+    milestone_id: prob 
+    for milestone_id, prob in frontier_scores.items() 
+    if milestone_id in available_milestone_ids
+}</code></pre>
+                
+                <h5>2. Strict Exclusion Check</h5>
+                <p>
+                    Completed milestones are excluded at multiple checkpoints to ensure they never appear:
+                </p>
+                <pre><code>completed_set = set(user_completed_ids)
+
+# In frontier aggregation
+if next_milestone not in user_completed_ids:
+    frontier_scores[next_milestone] = max(...)
+
+# In final filtering
+recommendations = [
+    rec for rec in recommendations 
+    if rec['milestone_id'] not in completed_set
+]</code></pre>
+                
+                <h5>3. Domain Diversity Enforcement</h5>
+                <p>
+                    During selection, we track selected domains and prioritize diversity:
+                </p>
+                <pre><code>selected_domains = set()
+selected_ids = set()
+
+def add_milestone_with_diversity_check(milestone_list):
+    for milestone in milestone_list:
+        if milestone['milestone_id'] in selected_ids:
+            continue
+        
+        milestone_domain = milestone.get('domain', 'unknown')
+        
+        # If domain already represented, check for alternatives
+        if milestone_domain in selected_domains:
+            available_different_domains = [
+                m for m in milestone_list 
+                if m.get('domain') not in selected_domains
+            ]
+            if available_different_domains:
+                continue  # Skip, prefer different domain
+        
+        # Add milestone
+        recommendations.append(milestone)
+        selected_domains.add(milestone_domain)
+        selected_ids.add(milestone['milestone_id'])
+        return True
+    return False</code></pre>
+                
+                <h5>4. Age Range Validation</h5>
+                <p>
+                    Recommendations are bounded to ensure they're developmentally appropriate:
+                </p>
+                <ul>
+                    <li>Foundational: Within 3 months of baby's current age (not too far in the past)</li>
+                    <li>Challenge: Within 3 months in the future (not too advanced)</li>
+                    <li>Likely: Within ±0.5 months of current age (age-appropriate)</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- New User Recommendations Section -->
+        <section id="new-user">
+            <h2>7. New User Recommendations (Age-Based)</h2>
+            
+            <div class="intuition">
+                <h4>Intuition</h4>
+                <p>
+                    When a user first signs up, they haven't completed any milestones yet, so we can't use the transition matrix. Instead, we use 
+                    a simpler approach: find milestones where the mastery age is close to the baby's current age, and prioritize the most common 
+                    milestones (those observed most frequently in the dataset). This ensures every new user gets relevant recommendations from day one.
+                </p>
+            </div>
+            
+            <div class="technical">
+                <h4>Age-Based Algorithm</h4>
+                
+                <h5>Step 1: Calculate Milestone Frequencies</h5>
+                <p>
+                    Count how many times each milestone appears in the dataset (non-missing observations):
+                </p>
+                <pre><code>def _calculate_milestone_frequencies(csv_file):
+    df = pd.read_csv(csv_file)
+    milestone_cols = get_milestone_columns(df)
+    
+    frequencies = {}
+    for col in milestone_cols:
+        count = (df[col] != -1).sum()  # Count non-missing
+        frequencies[col] = count
+    
+    return frequencies</code></pre>
+                
+                <h5>Step 2: Categorize by Age Difference</h5>
+                <p>
+                    Same categorization as main engine, but use frequency instead of transition probability:
+                </p>
+                <ul>
+                    <li><strong>Foundational</strong>: <code>0.5 < age_difference ≤ 3.0</code> (past age)</li>
+                    <li><strong>Likely</strong>: <code>|age_difference| ≤ 0.5</code> (age-appropriate)</li>
+                    <li><strong>Challenge</strong>: <code>-3.0 ≤ age_difference < -0.5</code> (future)</li>
+                </ul>
+                
+                <h5>Step 3: Sort by Frequency</h5>
+                <pre><code># Foundational: Sort by mastery_age (descending), then frequency
+foundational_milestones.sort(
+    key=lambda x: (x['mastery_age'], x['frequency']), 
+    reverse=True
+)
+
+# Likely: Sort by frequency (descending), then age difference
+likely_milestones.sort(
+    key=lambda x: (x['frequency'], -abs(x['age_difference'])), 
+    reverse=True
+)
+
+# Challenge: Sort by mastery_age (ascending - closest first), then frequency
+challenge_milestones.sort(
+    key=lambda x: (-x['mastery_age'], x['frequency']), 
+    reverse=True
+)</code></pre>
+                
+                <h5>Step 4: Select One from Each Category</h5>
+                <p>
+                    Apply the same domain diversity logic to ensure a balanced set of recommendations.
+                </p>
+            </div>
+        </section>
+        
+        <!-- Fallback Mechanisms Section -->
+        <section id="fallback">
+            <h2>8. Fallback Mechanisms</h2>
+            
+            <div class="intuition">
+                <h4>Intuition</h4>
+                <p>
+                    What happens when the primary recommendation logic (transition matrix) doesn't yield enough results? For example, if a baby has 
+                    completed many milestones, the transition-based recommendations might be exhausted. Or if the baby is very young or very old, 
+                    there might be fewer milestones in their age range. The fallback mechanisms ensure that the system always provides recommendations 
+                    by progressively relaxing constraints (age bounds, activity requirements) until sufficient recommendations are found.
+                </p>
+            </div>
+            
+            <div class="technical">
+                <h4>Progressive Fallback Strategy</h4>
+                
+                <h5>Level 1: Transition-Based Recommendations (Primary)</h5>
+                <p>
+                    Use transition matrix to find frontier milestones from completed milestones. This is the primary approach and is used for all 
+                    users with at least one completed milestone.
+                </p>
+                
+                <h5>Level 2: Age-Based Recommendations (First Fallback)</h5>
+                <p>
+                    If transition-based recommendations yield fewer than 3 results, fall back to age-based recommendations using progressively wider 
+                    age bounds:
+                </p>
+                <pre><code>age_bounds = [3.0, 6.0, 12.0, 24.0, 48.0]  # Months
+
+for bound in age_bounds:
+    recommendations = _get_age_based_recommendations(
+        baby_age_months,
+        completed_milestones,
+        max_age_diff=bound
+    )
+    if len(recommendations) >= 3:
+        break</code></pre>
+                
+                <h5>Level 3: Full Dataset Fallback (Last Resort)</h5>
+                <p>
+                    If most activity-linked milestones are completed (70%+), search the entire dataset (even milestones without specific activities):
+                </p>
+                <pre><code># Calculate completion percentage
+activity_milestone_ids = set(activities_map.keys())
+completed_activity_milestones = len([
+    mid for mid in user_completed_ids 
+    if mid in activity_milestone_ids
+])
+completion_rate = completed_activity_milestones / len(activity_milestone_ids)
+
+if completion_rate >= 0.70:
+    # Use all milestones in dataset, generate generic activities
+    recommendations = _get_age_based_recommendations(
+        baby_age_months,
+        completed_milestones,
+        available_milestones=ALL_MILESTONES,  # Not just activity-linked
+        max_age_diff=48.0
+    )</code></pre>
+                
+                <p>
+                    For milestones without specific activities, the API generates generic activity content at request time.
+                </p>
+            </div>
+        </section>
+        
+        <!-- Proficiency Detection Section -->
+        <section id="proficiency">
+            <h2>9. Proficiency Detection</h2>
+            
+            <div class="intuition">
+                <h4>Intuition</h4>
+                <p>
+                    Some babies develop faster than average. If a 9-month-old has already completed milestones typically achieved at 9 months, showing 
+                    them activities for 3-month-olds would be frustrating and not helpful. The proficiency detection mechanism identifies when a baby 
+                    has demonstrated age-appropriate (or advanced) progress and adjusts recommendations accordingly, prioritizing milestones at or 
+                    above their current age rather than below.
+                </p>
+            </div>
+            
+            <div class="technical">
+                <h4>Proficiency Detection Algorithm</h4>
+                
+                <h5>Step 1: Count Age-Appropriate Completed Milestones</h5>
+                <p>
+                    Count milestones that are at or near the baby's current age (within 1 month below or at/above):
+                </p>
+                <pre><code>age_appropriate_completed = 0
+
+for completed_id in user_completed_ids:
+    mastery_age = mastery_ages.get(completed_id)
+    if mastery_age is not None:
+        # Count milestones that are at or near baby's current age
+        if mastery_age >= baby_age_months - 1.0:  # Within 1 month
+            age_appropriate_completed += 1</code></pre>
+                
+                <h5>Step 2: Determine Proficiency Status</h5>
+                <p>
+                    If the baby has completed 2+ age-appropriate milestones, they've demonstrated proficiency:
+                </p>
+                <pre><code>restrict_foundational = age_appropriate_completed >= 2
+max_foundational_age_diff = 1.0 if restrict_foundational else 3.0
+min_allowed_mastery_age = baby_age_months - 2.0 if restrict_foundational else None</code></pre>
+                
+                <h5>Step 3: Apply Proficiency-Based Filtering</h5>
+                <p>
+                    For proficient babies:
+                </p>
+                <ul>
+                    <li><strong>Foundational milestones:</strong> Only recommend if within 1 month of current age (not 3 months)</li>
+                    <li><strong>Minimum mastery age:</strong> Never recommend milestones more than 2 months below baby's age</li>
+                    <li><strong>Selection priority:</strong> Prioritize Likely and Challenge over Foundational</li>
+                </ul>
+                
+                <pre><code>if restrict_foundational:
+    # Skip milestones that are too young
+    if min_allowed_mastery_age is not None and mastery_age < min_allowed_mastery_age:
+        continue  # Skip this milestone
+    
+    # If foundational, only include if very close (within 1 month)
+    if category == 'foundational':
+        if age_difference <= max_foundational_age_diff:
+            # Include
+        else:
+            # Skip or re-categorize as likely</code></pre>
+                
+                <h5>Step 4: Reorder Selection Priority</h5>
+                <p>
+                    For proficient babies, change the selection order:
+                </p>
+                <ol>
+                    <li>Likely (age-appropriate) - natural next step</li>
+                    <li>Challenge (future age) - advanced milestone</li>
+                    <li>Foundational (past age, but only very recent ones) - only if needed</li>
+                </ol>
+                
+                <p>
+                    This ensures proficient babies get forward-looking recommendations rather than catch-up activities.
+                </p>
+            </div>
+        </section>
+        
+        <footer>
+            <p>NextPlay Recommender System - Detailed Algorithm Documentation</p>
+            <p>Last Updated: 2024</p>
+        </footer>
+    </div>
+</body>
+</html>
+
